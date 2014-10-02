@@ -95,8 +95,7 @@ module Foreman::Model
 			args[:network_ids] = [args[:network_ids]] if args[:network_ids]
 			args[:network_ids] = [args[:subnet_id]] if args[:subnet_id]
 			args[:zone_id] = zone_id  ## TODO always using first zone now 
-			args[:flavor_id] = client.list_service_offerings["listserviceofferingsresponse"]["serviceoffering"][0]["id"] if args[:flavor_name] 
-			logger.info client.list_service_offerings["listserviceofferingsresponse"]["serviceoffering"] 
+			args[:flavor_id] = client.list_service_offerings["listserviceofferingsresponse"]["serviceoffering"].detect{|n| n["name"] == args[:flavor_name]}["id"] if args[:flavor_name]
 			vm      = super(args)
 			vm.wait_for { nics.present? }
 			#logger.info "captured ipaddress"
