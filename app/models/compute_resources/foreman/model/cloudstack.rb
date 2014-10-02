@@ -89,17 +89,19 @@ module Foreman::Model
 		end
 
 		def create_vm(args = {})
-            args[:display_name] = args[:name]
-            args[:name] = nil
-            args[:security_group_ids] = nil
-            args[:network_ids] = [args[:network_ids]] if args[:network_ids]
-            args[:network_ids] = [args[:subnet_id]] if args[:subnet_id]
-            args[:zone_id] = zone_id 
+			args[:display_name] = args[:name]
+			args[:name] = nil
+			args[:security_group_ids] = nil
+			args[:network_ids] = [args[:network_ids]] if args[:network_ids]
+			args[:network_ids] = [args[:subnet_id]] if args[:subnet_id]
+			args[:zone_id] = zone_id  ## TODO always using first zone now 
+			args[:flavor_id] = client.list_service_offerings["listserviceofferingsresponse"]["serviceoffering"][0]["id"] if args[:flavor_name] 
+			logger.info client.list_service_offerings["listserviceofferingsresponse"]["serviceoffering"] 
 			vm      = super(args)
 			vm.wait_for { nics.present? }
-			logger.info "captured ipaddress"
-			logger.info vm.nics[0]["ipaddress"] 
-			logger.info vm.inspect
+			#logger.info "captured ipaddress"
+			#logger.info vm.nics[0]["ipaddress"] 
+			#logger.info vm.inspect
 			vm
 		rescue => e
 			message = JSON.parse(e.response.body)['badRequest']['message'] rescue (e.to_s)
