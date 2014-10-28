@@ -1,7 +1,7 @@
 module FogExtensions
 	module Cloudstack
 		module Server
-			extend ActiveSupport::Concern
+			#extend ActiveSupport::Concern
 
 			#included do
 			#	alias_method_chain :security_groups, :no_id
@@ -12,21 +12,21 @@ module FogExtensions
 				name
 			end
 
-                        def ip_address
+      def ip_address
 				logger.info "BG inspect nics:"
 				logger.info nics.inspect
-                                return nics[0]["ipaddress"]
-                        end
+        return nics[0]["ipaddress"]
+      end
 
 			def test_method
-                                nics[0]["ipaddress"]
+        nics[0]["ipaddress"]
 			end
 
-                        def ip_addresses
+      def ip_addresses
 				logger.info "BG inspect nics:"
 				logger.info nics.inspect 
-                                nics.map { |n| n.ipaddress } 
-                        end
+        nics.map { |n| n.ipaddress } 
+      end
 
 			def start
 				if state.downcase == 'paused'

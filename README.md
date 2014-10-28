@@ -4,8 +4,6 @@ This plugin enables provisioning and managing a Cloudstack Server in Foreman.
 
 ## Installation
 
-The only way I can get this to work today is unzipping the source code here on top of foreman or by using the included Vagrantfile. The typical gem installation is what I want to support but does not work yet.
-
 Please see the Foreman manual for appropriate instructions:
 
 * [Foreman: How to Install a Plugin](http://theforeman.org/manuals/latest/index.html#6.1InstallaPlugin)
@@ -22,7 +20,7 @@ The gem name is "foreman_cloudstack".
 
 You can get the develop branch of the plugin by specifying your Gemfile in this way:
 
-    gem 'foreman_cloudstack', :git => "https://github.com/ddoc/foreman-cloudstack.git"
+    gem 'foreman_cloudstack', :git => "https://github.com/citrix/foreman-cloudstack.git"
 
 ## Limitations
 

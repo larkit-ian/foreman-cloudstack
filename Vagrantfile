@@ -60,11 +60,9 @@ mysql -u root -ppassword -e 'create database foreman'
 foreman-rake db:migrate
 foreman-rake db:seed
 cd /vagrant
-tar czf /usr/share/foreman/cloudstack-cr.tgz app/
-cd /usr/share/foreman
-tar xvzf cloudstack-cr.tgz
-echo >> /etc/foreman/settings.yaml
-echo :cloudstack: true >> /etc/foreman/settings.yaml
+echo "gem 'foreman_cloudstack', :path => '/vagrant/foreman-cloudstack'"
+cd /usr/share/foreman/
+/usr/bin/bundle install
 
 service foreman restart
 chkconfig foreman on
