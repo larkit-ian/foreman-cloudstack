@@ -158,7 +158,7 @@ SCRIPT
     foremanmysql.vm.network "private_network", ip: "192.168.56.4"
     foremanmysql.vm.network "forwarded_port", guest: 3000, host: 3000 
     foremanmysql.vm.provision :shell, inline: $foremanscript 
-    foremanmysql.vm.box = "bgalura/foreman1.5"
+    foremanmysql.vm.box = "bgalura/foreman-1.5"
     foremanmysql.vm.provider "virtualbox" do |v|
       v.memory = 2048 
     end
