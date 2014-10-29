@@ -10,6 +10,8 @@ Please see the Foreman manual for appropriate instructions:
 
 The gem name is "foreman_cloudstack".
 
+You can also use the Vagrantfile included.
+
 ## Compatibility
 
 | Foreman Version | Plugin Version |

@@ -1,7 +1,7 @@
 module FogExtensions
 	module Cloudstack
 		module Server
-			#extend ActiveSupport::Concern
+			extend ActiveSupport::Concern
 
 			#included do
 			#	alias_method_chain :security_groups, :no_id
