@@ -10,13 +10,6 @@ module ForemanCloudstack
     
     validates_presence_of :url, :user, :password
 
-    #def provided_attributes
-    #  super.merge(
-    #    { :uuid => :reference,
-    #      :mac  => :mac
-    #    })
-    #end
-
     def domains 
       return [] if url.blank? or user.blank? or password.blank?
       domainsobj = client.list_domains
@@ -97,12 +90,12 @@ module ForemanCloudstack
     def create_vm(args = {})
     	args[:display_name] = args[:name]
     	args[:name] = nil
-    	args[:security_group_ids] = nil
+    	args[:security_group_ids] = [args[:security_group_ids]] if args[:security_group_ids]
     	args[:network_ids] = [args[:network_ids]] if args[:network_ids]
     	args[:network_ids] = [args[:subnet_id]] if args[:subnet_id]
     	args[:zone_id] = zone_id  ## TODO always using first zone now 
     	args[:flavor_id] = client.list_service_offerings["listserviceofferingsresponse"]["serviceoffering"].detect{|n| n["name"] == args[:flavor_name]}["id"] if args[:flavor_name]
-    	vm      = super(args)
+    	vm = super(args)
     	vm.wait_for { nics.present? }
     	#logger.info "captured ipaddress"
     	#logger.info vm.nics[0]["ipaddress"] 

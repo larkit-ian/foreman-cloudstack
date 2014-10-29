@@ -80,7 +80,7 @@ module FogExtensions
 			end
 
 			def vm_description
-				service.flavors.get(flavor_ref).try(:name)
+				service.flavors.get(:id).try(:name)
 			end
 
 		end
