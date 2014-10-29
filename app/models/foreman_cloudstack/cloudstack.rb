@@ -7,41 +7,43 @@ module ForemanCloudstack
     delegate :flavors, :to => :client
     attr_accessor :zone
     #alias_attribute :subnet_id, :network_ids
-    
+
     validates_presence_of :url, :user, :password
 
     def domains 
       return [] if url.blank? or user.blank? or password.blank?
+      
       domainsobj = client.list_domains
-
+      
       domains_array = []
       zonesobj["listdomainsresponse"]["domain"].each do |domain|
-          z =  domain["name"] 
-          domains_array.push(z)
+        z =  domain["name"] 
+        domains_array.push(z)
       end
-    	logger.info(domainsobj)
-    	logger.info(domains_array)
+      logger.info(domainsobj)
+      logger.info(domains_array)
       return domains_array
     end
 
     def zones
       return [] if url.blank? or user.blank? or password.blank?
-      zonesobj = client.list_zones
       
+      zonesobj = client.list_zones
+
       zones_array = []
       zonesobj["listzonesresponse"]["zone"].each do |zone|
-          z =  zone["name"] 
-          zones_array.push(z)
+        z =  zone["name"] 
+        zones_array.push(z)
       end
       return zones_array
     end
 
     def domain 
-    	attrs[:domain]
+      attrs[:domain]
     end
 
     def zone
-    	attrs[:zone]
+      attrs[:zone]
     end
 
     def zone_id
@@ -49,19 +51,19 @@ module ForemanCloudstack
     end
 
     def provided_attributes
-    	super.merge({ :ip => :test_method })
+      super.merge({ :ip => :test_method })
     end
 
     def self.model_name
-    	ComputeResource.model_name
+      ComputeResource.model_name
     end
 
     def image_param_name
-    	:image_ref
+      :image_ref
     end
 
     def capabilities
-    	[:image]
+      [:image]
     end
 
     def networks
@@ -77,65 +79,65 @@ module ForemanCloudstack
     end
 
     def test_connection options = {}
-    	super
-    	errors[:url].empty? and errors[:user].empty? and errors[:password].empty? and zones
+      super
+      errors[:url].empty? and errors[:user].empty? and errors[:password].empty? and zones
     rescue Fog::Compute::Cloudstack::Error => e
-    	errors[:base] << e.message
+      errors[:base] << e.message
     end
 
     def available_images
-    	client.images
+      client.images
     end
 
     def create_vm(args = {})
-    	args[:display_name] = args[:name]
-    	args[:name] = nil
-    	args[:security_group_ids] = [args[:security_group_ids]] if args[:security_group_ids]
-    	args[:network_ids] = [args[:network_ids]] if args[:network_ids]
-    	args[:network_ids] = [args[:subnet_id]] if args[:subnet_id]
-    	args[:zone_id] = zone_id  ## TODO always using first zone now 
-    	args[:flavor_id] = client.list_service_offerings["listserviceofferingsresponse"]["serviceoffering"].detect{|n| n["name"] == args[:flavor_name]}["id"] if args[:flavor_name]
-    	vm = super(args)
-    	vm.wait_for { nics.present? }
-    	#logger.info "captured ipaddress"
-    	#logger.info vm.nics[0]["ipaddress"] 
-    	#logger.info vm.inspect
-    	vm
+      args[:display_name] = args[:name]
+      args[:name] = nil
+      args[:security_group_ids] = [args[:security_group_ids]] if args[:security_group_ids]
+      args[:network_ids] = [args[:network_ids]] if args[:network_ids]
+      args[:network_ids] = [args[:subnet_id]] if args[:subnet_id]
+      args[:zone_id] = zone_id  ## TODO always using first zone now 
+      args[:flavor_id] = client.list_service_offerings["listserviceofferingsresponse"]["serviceoffering"].detect{|n| n["name"] == args[:flavor_name]}["id"] if args[:flavor_name]
+      vm = super(args)
+      vm.wait_for { nics.present? }
+      #logger.info "captured ipaddress"
+      #logger.info vm.nics[0]["ipaddress"] 
+      #logger.info vm.inspect
+      vm
     rescue => e
-    	message = JSON.parse(e.response.body)['badRequest']['message'] rescue (e.to_s)
-    	logger.warn "failed to create vm: #{message}"
-    	destroy_vm vm.id if vm
-    	raise message
+      message = JSON.parse(e.response.body)['badRequest']['message'] rescue (e.to_s)
+      logger.warn "failed to create vm: #{message}"
+      destroy_vm vm.id if vm
+      raise message
     end
 
     def destroy_vm uuid
-    	vm           = find_vm_by_uuid(uuid)
-    	super(uuid)
+      vm = find_vm_by_uuid(uuid)
+      super(uuid)
     rescue ActiveRecord::RecordNotFound
-    	# if the VM does not exists, we don't really care.
-    	true
+      # if the VM does not exists, we don't really care.
+      true
     end
 
     def console(uuid)
-    	vm = find_vm_by_uuid(uuid)
-    	vm.console.body.merge({'timestamp' => Time.now.utc})
+      vm = find_vm_by_uuid(uuid)
+      vm.console.body.merge({'timestamp' => Time.now.utc})
     end
 
     def associated_host(vm)
-    	Host.authorized(:view_hosts, Host).where(:ip => [vm.nics[0]["ipaddress"], vm.floating_ip_address, vm.private_ip_address]).first
+      Host.authorized(:view_hosts, Host).where(:ip => [vm.nics[0]["ipaddress"], vm.floating_ip_address, vm.private_ip_address]).first
     end
 
     def ip_address uuid
-     	vm = find_vm_by_uuid(uuid)
-    	vm.nics[0]["ipaddress"]	
+      vm = find_vm_by_uuid(uuid)
+      vm.nics[0]["ipaddress"]	
     end
 
     def flavor_name(flavor_ref)
-    	client.flavors.get(flavor_ref).try(:name)
+      client.flavors.get(flavor_ref).try(:name)
     end
 
     def provider_friendly_name
-    	"Cloudstack"
+      "Cloudstack"
     end
 
     private
@@ -146,7 +148,7 @@ module ForemanCloudstack
       path = results[4]
       host = results[2]
       port = results[3]
-      
+
       @client = Fog::Compute.new(
         :provider => 'cloudstack',
         :cloudstack_api_key => user,
@@ -155,18 +157,18 @@ module ForemanCloudstack
         :cloudstack_path => path,
         :cloudstack_scheme => scheme,
         :cloudstack_secret_access_key => password
-      )      
+      )
     end
 
     def setup_key_pair
       result = client.create_ssh_key_pair("foreman-#{id}#{Foreman.uuid}")
       private_key = result["createsshkeypairresponse"]["keypair"]["privatekey"]
       name = result["createsshkeypairresponse"]["keypair"]["name"]
-    	KeyPair.create! :name => name, :compute_resource_id => self.id, :secret => private_key
+      KeyPair.create! :name => name, :compute_resource_id => self.id, :secret => private_key
     rescue => e
-    	logger.warn "failed to generate key pair"
-    	destroy_key_pair
-    	raise
+      logger.warn "failed to generate key pair"
+      destroy_key_pair
+      raise
     end
 
     def destroy_key_pair
@@ -177,14 +179,14 @@ module ForemanCloudstack
       key_pair.destroy
       true
     rescue => e
-    	logger.warn "failed to delete key pair from CloudStack, you might need to cleanup manually : #{e}"
+      logger.warn "failed to delete key pair from CloudStack, you might need to cleanup manually : #{e}"
     end
 
     def vm_instance_defaults
-    	super.merge(
-    		:key_name  => key_pair.name
-    	)
+      super.merge(
+        :key_name  => key_pair.name
+      )
     end
-    
+
   end
 end

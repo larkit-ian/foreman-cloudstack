@@ -20,7 +20,6 @@ module ForemanCloudstack
         # Register cloudstack compute resource in foreman
         compute_resource ForemanCloudstack::Cloudstack
       end
-
     end
 
   end
